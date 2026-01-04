@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gest„o de Futebol</title>
+<title>Gest√£o de Futebol</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
   header { background: #0077b6; color: white; padding: 1rem; text-align: center; }
@@ -24,16 +24,16 @@
 <body>
 
 <header>
-  <h1>Gest„o de Futebol</h1>
+  <h1>Gest√£o de Futebol</h1>
 </header>
 
 <nav>
   <button onclick="showSection('game')">Jogo</button>
   <button onclick="showSection('summary')">Resumo</button>
-  <button onclick="showSection('stats')">EstatÌsticas</button>
+  <button onclick="showSection('stats')">Estat√≠sticas</button>
 </nav>
 
-<!-- P·gina do Jogo -->
+<!-- P√°gina do Jogo -->
 <section id="game" class="active">
   <h2>Jogo em Tempo Real</h2>
   <label>Tipo de jogo: 
@@ -47,7 +47,7 @@
   <ul id="starterList" class="player-list"></ul>
   <h3>Suplentes</h3>
   <ul id="subList" class="player-list"></ul>
-  <h3>CronÙmetro: <span id="timer">00:00</span></h3>
+  <h3>Cron√¥metro: <span id="timer">00:00</span></h3>
   <button onclick="startTimer()">Iniciar</button>
   <button onclick="pauseTimer()">Pausar</button>
   <button onclick="resetTimer()">Resetar</button>
@@ -62,16 +62,16 @@
   <button onclick="saveGame()">Salvar Jogo</button>
 </section>
 
-<!-- EstatÌsticas da Temporada -->
+<!-- Estat√≠sticas da Temporada -->
 <section id="stats">
-  <h2>EstatÌsticas da Temporada</h2>
+  <h2>Estat√≠sticas da Temporada</h2>
   <ul id="statsList" class="player-list"></ul>
 </section>
 
 <script>
-// Dados iniciais (vocÍ vai substituir por Google Sheets)
+// Dados iniciais (voc√™ vai substituir por Google Sheets)
 let players = [
-  {name: "Jo„o", number: 1, position: "Goleiro", goals:0, assists:0, cards:0, minutes:0},
+  {name: "Jo√£o", number: 1, position: "Goleiro", goals:0, assists:0, cards:0, minutes:0},
   {name: "Pedro", number: 2, position: "Defensor", goals:0, assists:0, cards:0, minutes:0},
   {name: "Lucas", number: 3, position: "Meio", goals:0, assists:0, cards:0, minutes:0},
   {name: "Rafael", number: 4, position: "Atacante", goals:0, assists:0, cards:0, minutes:0}
@@ -137,7 +137,7 @@ function handleAction(player, action) {
       starters = starters.filter(p => p!==player);
       renderPlayers();
       renderSubs();
-      events.push({player:player.name, type:'SubstituiÁ„o', minute:getMinute()});
+      events.push({player:player.name, type:'Substitui√ß√£o', minute:getMinute()});
       break;
   }
 }
@@ -159,12 +159,12 @@ function renderStats() {
   statsList.innerHTML = '';
   players.forEach(p => {
     const li = document.createElement('li');
-    li.textContent = `${p.name} (#${p.number}) - Gols: ${p.goals}, AssistÍncias: ${p.assists}, Cartıes: ${p.cards}, Minutos: ${p.minutes}`;
+    li.textContent = `${p.name} (#${p.number}) - Gols: ${p.goals}, Assist√™ncias: ${p.assists}, Cart√µes: ${p.cards}, Minutos: ${p.minutes}`;
     statsList.appendChild(li);
   });
 }
 
-// CronÙmetro
+// Cron√¥metro
 function startTimer() {
   if(timerInterval) return;
   timerInterval = setInterval(() => {
@@ -184,7 +184,7 @@ function saveGame() {
   alert("Jogo salvo! (ainda precisa conectar ao Google Sheets)");
 }
 
-// InicializaÁ„o
+// Inicializa√ß√£o
 renderPlayers();
 renderSubs();
 </script>
