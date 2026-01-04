@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Futebol</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+  header { background: #0077b6; color: white; padding: 1rem; text-align: center; }
+  nav { display: flex; justify-content: center; background: #023e8a; }
+  nav button { margin: 0.5rem; padding: 0.5rem 1rem; color: white; background: #0077b6; border: none; cursor: pointer; }
+  nav button:hover { background: #0096c7; }
+  section { display: none; padding: 1rem; }
+  .active { display: block; }
+  .player-list, .event-list { list-style: none; padding: 0; }
+  .player-list li, .event-list li { margin: 0.5rem 0; padding: 0.5rem; background: white; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+  .player-actions button { margin-left: 0.3rem; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; }
+  .progress-bar { background: #ddd; border-radius: 5px; overflow: hidden; margin: 0.3rem 0; }
+  .progress-bar-inner { height: 1rem; background: #0077b6; width: 0%; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gestão de Futebol</h1>
+</header>
+
+<nav>
+  <button onclick="showSection('game')">Jogo</button>
+  <button onclick="showSection('summary')">Resumo</button>
+  <button onclick="showSection('stats')">Estatísticas</button>
+</nav>
+
+<!-- Página do Jogo -->
+<section id="game" class="active">
+  <h2>Jogo em Tempo Real</h2>
+  <label>Tipo de jogo: 
+    <select id="gameType">
+      <option value="5">5x5</option>
+      <option value="7">7x7</option>
+      <option value="11">11x11</option>
+    </select>
+  </label>
+  <h3>Jogadores Titulares</h3>
+  <ul id="starterList" class="player-list"></ul>
+  <h3>Suplentes</h3>
+  <ul id="subList" class="player-list"></ul>
+  <h3>Cronômetro: <span id="timer">00:00</span></h3>
+  <button onclick="startTimer()">Iniciar</button>
+  <button onclick="pauseTimer()">Pausar</button>
+  <button onclick="resetTimer()">Resetar</button>
+</section>
+
+<!-- Resumo do Jogo -->
+<section id="summary">
+  <h2>Resumo do Jogo</h2>
+  <p>Placar: <span id="finalScore">0 - 0</span></p>
+  <h3>Eventos</h3>
+  <ul id="eventList" class="event-list"></ul>
+  <button onclick="saveGame()">Salvar Jogo</button>
+</section>
+
+<!-- Estatísticas da Temporada -->
+<section id="stats">
+  <h2>Estatísticas da Temporada</h2>
+  <ul id="statsList" class="player-list"></ul>
+</section>
+
+<script>
+// Dados iniciais (você vai substituir por Google Sheets)
+let players = [
+  {name: "João", number: 1, position: "Goleiro", goals:0, assists:0, cards:0, minutes:0},
+  {name: "Pedro", number: 2, position: "Defensor", goals:0, assists:0, cards:0, minutes:0},
+  {name: "Lucas", number: 3, position: "Meio", goals:0, assists:0, cards:0, minutes:0},
+  {name: "Rafael", number: 4, position: "Atacante", goals:0, assists:0, cards:0, minutes:0}
+];
+let starters = [...players];
+let subs = [];
+let events = [];
+let timerInterval;
+let totalSeconds = 0;
+
+function showSection(id) {
+  document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='stats') renderStats();
+  if(id==='summary') renderSummary();
+}
+
+// Render jogadores
+function renderPlayers() {
+  const starterList = document.getElementById('starterList');
+  starterList.innerHTML = '';
+  starters.forEach((p,i) => {
+    const li = document.createElement('li');
+    li.textContent = `${p.name} (#${p.number})`;
+    const actions = document.createElement('span');
+    actions.className = 'player-actions';
+    ['Gol','Amarelo','Vermelho','Sub'].forEach(act => {
+      const btn = document.createElement('button');
+      btn.textContent = act;
+      btn.onclick = () => handleAction(p, act);
+      actions.appendChild(btn);
+    });
+    li.appendChild(actions);
+    starterList.appendChild(li);
+  });
+}
+function renderSubs() {
+  const subList = document.getElementById('subList');
+  subList.innerHTML = '';
+  subs.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = `${p.name} (#${p.number})`;
+    subList.appendChild(li);
+  });
+}
+
+function handleAction(player, action) {
+  switch(action) {
+    case 'Gol':
+      player.goals +=1;
+      events.push({player:player.name, type:'Gol', minute:getMinute()});
+      break;
+    case 'Amarelo':
+      player.cards +=1;
+      events.push({player:player.name, type:'Amarelo', minute:getMinute()});
+      break;
+    case 'Vermelho':
+      player.cards +=1;
+      events.push({player:player.name, type:'Vermelho', minute:getMinute()});
+      break;
+    case 'Sub':
+      subs.push(player);
+      starters = starters.filter(p => p!==player);
+      renderPlayers();
+      renderSubs();
+      events.push({player:player.name, type:'Substituição', minute:getMinute()});
+      break;
+  }
+}
+
+function renderSummary() {
+  const eventList = document.getElementById('eventList');
+  eventList.innerHTML = '';
+  events.forEach(ev => {
+    const li = document.createElement('li');
+    li.textContent = `${ev.minute}' - ${ev.player}: ${ev.type}`;
+    eventList.appendChild(li);
+  });
+  const goals = starters.reduce((acc,p)=>acc+p.goals,0)+subs.reduce((acc,p)=>acc+p.goals,0);
+  document.getElementById('finalScore').textContent = `${goals} - 0`; // Exemplo simplificado
+}
+
+function renderStats() {
+  const statsList = document.getElementById('statsList');
+  statsList.innerHTML = '';
+  players.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = `${p.name} (#${p.number}) - Gols: ${p.goals}, Assistências: ${p.assists}, Cartões: ${p.cards}, Minutos: ${p.minutes}`;
+    statsList.appendChild(li);
+  });
+}
+
+// Cronômetro
+function startTimer() {
+  if(timerInterval) return;
+  timerInterval = setInterval(() => {
+    totalSeconds++;
+    starters.forEach(p=>p.minutes++);
+    document.getElementById('timer').textContent = formatTime(totalSeconds);
+  },1000);
+}
+function pauseTimer(){ clearInterval(timerInterval); timerInterval=null; }
+function resetTimer(){ clearInterval(timerInterval); timerInterval=null; totalSeconds=0; document.getElementById('timer').textContent='00:00'; }
+function formatTime(sec){ const m=Math.floor(sec/60).toString().padStart(2,'0'); const s=(sec%60).toString().padStart(2,'0'); return `${m}:${s}`; }
+function getMinute(){ return Math.floor(totalSeconds/60); }
+
+// Salvar jogo (exemplo com console, depois conecta Google Sheets)
+function saveGame() {
+  console.log("Salvar Jogo:", {players, events});
+  alert("Jogo salvo! (ainda precisa conectar ao Google Sheets)");
+}
+
+// Inicialização
+renderPlayers();
+renderSubs();
+</script>
+
+</body>
+</html>
